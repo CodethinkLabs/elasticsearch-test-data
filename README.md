@@ -1,132 +1,105 @@
-# Quick fix for opensearch 2.6 
-- fix index creation
-- remove doc type
-
-# Elasticsearch For Beginners: Generate and Upload Randomized Test Data
+# OpenSearch : Generate and Upload Randomized Test Data
 
 Because everybody loves test data.
 
 ## Ok, so what is this thing doing?
 
-`es_test_data.py` lets you generate and upload randomized test data to
-your ES cluster so you can start running queries, see what performance
-is like, and verify your cluster is able to handle the load.
+`opensearch_test.py` lets you generate and upload randomized test data and queries, see what performance is like, and verify your cluster is able to handle the load.
 
-It allows for easy configuring of what the test documents look like, what
-kind of data types they include and what the field names are called.
+It allows for easy configuring of what the test documents look like, what kind of data types they include and what the field names are called.
 
-## Cool, how do I use this? 
+## File Descriptions
 
-### Run Python script
+- **requirements.txt**: Lists the Python dependencies required to run the test script.
+- **modules** Folder: Modularized python fuctions.
+- **opensearch_test.py**: The main Python script that performs the OpenSearch tests.
+- **LICENSE**: License
+- **Dockerfile**: Contains the instructions to build the Docker image for the test environment.
 
-Let's assume you have an Elasticsearch cluster running.
+## Before Using it
 
-Python and [Tornado](https://github.com/tornadoweb/tornado/) are used. Run
-`pip install tornado` to install Tornado if you don't have it already.
+### Change Server Config
 
-It's as simple as this:
+Recommended method for Config is create `server.conf` file and input the values needed.
 
+If you are not using a config file, you need to pass the required values as `arguments`.
+
+However, when there are many values to set, it is much more convenient to create and use a `server.conf` file.
+
+Enter the desired options in the `server.conf` file.
+
+Example:
+
+Create the configure file
+
+```shell
+cd ${REPO}
+touch server.conf
+${EDITOR} server.conf
 ```
-$ python es_test_data.py --es_url=http://localhost:9200
-[I 150604 15:43:19 es_test_data:42] Trying to create index http://localhost:9200/test_data
-[I 150604 15:43:19 es_test_data:47] Guess the index exists already
-[I 150604 15:43:19 es_test_data:184] Generating 10000 docs, upload batch size is 1000
-[I 150604 15:43:19 es_test_data:62] Upload: OK - upload took:    25ms, total docs uploaded:    1000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    25ms, total docs uploaded:    2000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    19ms, total docs uploaded:    3000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    18ms, total docs uploaded:    4000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    27ms, total docs uploaded:    5000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    19ms, total docs uploaded:    6000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    15ms, total docs uploaded:    7000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    24ms, total docs uploaded:    8000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    32ms, total docs uploaded:    9000
-[I 150604 15:43:20 es_test_data:62] Upload: OK - upload took:    31ms, total docs uploaded:   10000
-[I 150604 15:43:20 es_test_data:216] Done - total docs uploaded: 10000, took 1 seconds
-[I 150604 15:43:20 es_test_data:217] Bulk upload average:           23 ms
-[I 150604 15:43:20 es_test_data:218] Bulk upload median:            24 ms
-[I 150604 15:43:20 es_test_data:219] Bulk upload 95th percentile:   31 ms
+
+Edit configure file
+
+### Basic configure file example
+
+```conf
+# server.conf
+action = "all"
+opensearch_url = "https://uri.for.opensearch.db:port"
+username = "./client_cert.pem"
+password = "./client_key.pem"
 ```
- 
-Without any command line options, it will generate and upload 1000 documents
-of the format
 
-```
-{
-    "name":<<str>>,
-    "age":<<int>>,
-    "last_updated":<<ts>>
-}
-```
-to an Elasticsearch cluster at `http://localhost:9200` to an index called
-`test_data`.
+### What can be configure?
 
-### Docker and Docker Compose
+| Setting                 | Description                                                            | Default Value           |
+| ----------------------- | ---------------------------------------------------------------------- | ----------------------- |
+| action                  | Specify the action to be performed.                                    | all                     |
+| json_path               | Query JSON file path                                                   | None                    |
+| batch_size              | OpenSearch bulk index batch size                                       | 1000                    |
+| client_cert             | Filepath of CA certificates in PEM format                              | None                    |
+| client_key              | Filepath of client SSL key                                             | None                    |
+| count                   | Number of docs to generate                                             | 100000                  |
+| data_file               | Name of the documents file to use                                      | None                    |
+| dict_file               | Name of dictionary file to use                                         | None                    |
+| finish_time             | Shape Finish Time in '%Y-%m-%d %H:%M:%S' format                        | None                    |
+| force_init_index        | Force deleting and re-initializing the OpenSearch index                | False                   |
+| format                  | Message format                                                         | (truncated for brevity) |
+| http_upload_timeout     | Timeout in seconds when uploading data                                 | 10                      |
+| id_type                 | Type of 'id' to use for the docs, int or uuid4                         | None                    |
+| index_name              | Name of the index to store your messages                               | test                    |
+| index_type              | Index type                                                             | test_type               |
+| number_of_replicas      | Number of replicas for OpenSearch index                                | 1                       |
+| number_of_shards        | Number of shards for OpenSearch index                                  | 1                       |
+| opensearch_url          | URL of your OpenSearch node                                            | http://localhost:9200   |
+| out_file                | Write test data to out_file as well                                    | False                   |
+| password                | Password for OpenSearch                                                | None                    |
+| random_seed             | Random seed number for Faker                                           | None                    |
+| set_refresh             | Set refresh rate to -1 before starting the upload                      | False                   |
+| start_time              | Shape Start Time in '%Y-%m-%d %H:%M:%S' format                         | None                    |
+| username                | Username for OpenSearch                                                | None                    |
+| validate_cert           | SSL validate_cert for requests. Use false for self-signed certificates | True                    |
 
-Requires [Docker](https://docs.docker.com/get-docker/) for running the app and [Docker Compose](https://docs.docker.com/compose/install/) for running a single ElasticSearch domain with two nodes (es1 and es2).
+Main configuration values are as follows.
 
-1. Set the maximum virtual memory of your machine to `262144` otherwise the ElasticSearch instances will crash, [see the docs](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html)
-    ```bash
-    $ sudo sysctl -w vm.max_map_count=262144
-    ```
-1. Clone this repository
-    ```bash
-    $ git clone https://github.com/oliver006/elasticsearch-test-data.git
-    $ cd elasticsearch-test-data
-    ```
-1. Run the ElasticSearch stack
-    ```bash
-    $ docker-compose up --detached
-    ```
-1. Run the app and inject random data to the ES stack
-    ```bash
-    $ docker run --rm -it --network host oliver006/es-test-data  \
-        --es_url=http://localhost:9200  \
-        --batch_size=10000  \
-        --username=elastic \
-        --password="esbackup-password"
-    ```
-1. Cleanup
-    ```bash
-    $ docker-compose down --volumes
-    ```
+- `action`: [generate_data, query_all, custom_query, delete_index, all] choose one
+  - generate_data: upload the data generated through `format` to the OpenSearch database.
+  - query_all: request all values of the specified index within the range using `start_time` and `finish_time`.
+  - custom_query: You can specify the values for the body used in the request through a JSON file. this option require `json_path`. For more [read docs](https://opensearch.org/docs/latest/api-reference/search/)
+  - delete_index: All data at the specified index will be deleted. (Please use with caution.)
+  - all: I will conduct whole process test.(generate_data -> query_all -> delete_index)
+- `start_time` and `finish_time`: If values are `None`, they will default to 30 days before and 30 days after the current time.
+- The values that need to be set according to the server's security settings are as follows:
+  - `validate_cert`
+  - `client_cert`
+  - `client_key`
+  - `username`
+  - `password`
+- `format`: See this section [Generate Custom Document format](#generate-custom-document-format)
+- `random_seed`: Most of the values are generated using the `Faker` library. This value is a random seed number used for that.
+- `count` and `batch_size`: `count` represents the total number of docs to be generated, while the `batch_size` specifies the number of docs that uploaded at once.
 
-## Not bad but what can I configure?
-
-`python es_test_data.py --help` gives you the full set of command line
-ptions, here are the most important ones:
-
-- `--es_url=http://localhost:9200` the base URL of your ES node, don't
-  include the index name
-- `--username=<username>` the username when basic auth is required
-- `--password=<password>` the password when basic auth is required
-- `--count=###` number of documents to generate and upload
-- `--index_name=test_data` the name of the index to upload the data to.
-  If it doesn't exist it'll be created with these options
-  - `--num_of_shards=2` the number of shards for the index
-  - `--num_of_replicas=0` the number of replicas for the index
-- `--batch_size=###` we use bulk upload to send the docs to ES, this option
-  controls how many we send at a time
-- `--force_init_index=False` if `True` it will delete and re-create the index
-- `--dict_file=filename.dic` if provided the `dict` data type will use words
-  from the dictionary file, format is one word per line. The entire file is
-  loaded at start-up so be careful with (very) large files.
-- `--data_file=filename.json|filename.csv` if provided all data in the filename will be inserted into es. The file content has to be an array of json objects (the documents). If the file ends in `.csv` then the data is automatically converted into json and inserted as documents.
-
-## What about the document format?
-
-Glad you're asking, let's get to the doc format.
-
-The doc format is configured via `--format=<<FORMAT>>` with the default being
-`name:str,age:int,last_updated:ts`.
-
-The general syntax looks like this:
-
-`<<field_name>>:<<field_type>>,<<field_name>>::<<field_type>>, ...`
-
-For every document, `es_test_data.py` will generate random values for each of
-the fields configured.
-
-Currently supported field types are:
+### Generate Custom Document format
 
 - `bool` returns a random true or false
 - `ts` a timestamp (in milliseconds), randomly picked between now +/- 30 days
@@ -146,17 +119,84 @@ Currently supported field types are:
   given list of `-` seperated words, the words are optional defaulting to
   `text1` `text2` and `text3`, min and max are optional, defaulting to `1`
   and `1`
-- `arr:[array_length_expression]:[single_element_format]` an array of entries 
-  with format specified by `single_element_format`. `array_length_expression` 
-  can be either a single number, or pair of numbers separated by `-` (i.e. 3-7), 
-  defining range of lengths from with random length will be picked for each array
-  (Example `int_array:arr:1-5:int:1:250`)
+- `arr:[array_length_expression]:[single_element_format]` an array of entries with format specified by `single_element_format`.  `array_length_expression` can be either a single number, or pair of numbers separated by `-` (i.e. 3-7), defining range of lengths from with random length will be picked for each array (Example `int_array:arr:1-5:int:1:250`)
+- `log_version` a random version `str` looks like v1.1.1
+- `sha` generate random sha(len 40)
+- `file_name` Generate fake python file(.py)
+- `uuid` Generate fake uuid
+- `service` Generate fake service name
 
+for more read this github repo [README.md](https://github.com/obazda20/opensearch-test-data?tab=readme-ov-file#what-about-the-document-format) file
 
-## Todo
+## Testing Methods
 
-- document the remaining cmd line options
-- more different format types
-- ...
+Testing can be run either use `Docker` or run the `Python` file directly.
 
-All suggestions, comments, ideas, pull requests are welcome!
+### Using Docker
+
+`Docker` must be installed, and you need to have an internet connection.  
+
+Follow [Install Docker Engine](https://docs.docker.com/engine/install/)
+
+Do not forgot to mount all files using -v when running `docker run`.
+
+```shell
+cd ${REPO}
+docker build -t <docker_image_name>:<tag> .
+docker run -v ${PWD}/client_cert.pem:/app/client_cert.pem -v ${PWD}/client_key.pem:/app/client_key.pem -v /server.conf:/app/server.conf <docker_image_name>:<tag>
+```
+
+### Using python
+
+[python3](https://www.python.org/downloads/) needs to be installed.
+
+Dependencies can be installed from `requirements.txt`.
+
+Example:
+
+```shell
+# install requirements
+pip install --no-cache-dir -r requirements.txt
+```
+
+After the installation of dependencies is complete, you should check if the required file paths are set correctly, and then you can run it as follows.
+
+Please check if the following files are properly configured before execution.
+
+- server.conf
+- client_cert.pem(optional)
+- client_key.pem(optional)
+- custom_query_json_file(optional)
+
+```shell
+# run script
+python opensearch_test.py
+```
+
+## Result Example
+
+```bash
+[I 241114 10:42:31 opensearch_test:47] ***Start Data Generate Test***
+[I 241114 10:42:32 requests:83] Trying to create index https://db.test.co.kr/test
+[I 241114 10:42:33 requests:89] Looks like the index exists already
+[I 241114 10:42:33 upload_data:83] Generating 20000 docs, upload batch size is 10000
+[I 241114 10:42:55 requests:109] Upload: OK - upload took:  4551ms, total docs uploaded:   10000
+[I 241114 10:43:18 requests:109] Upload: OK - upload took:  4598ms, total docs uploaded:   20000
+[I 241114 10:43:18 upload_data:123] Done - total docs uploaded: 20000, took 45 seconds
+[I 241114 10:43:18 opensearch_test:52] ***Start Query All Test***
+[I 241114 10:43:41 requests:226] Total hits: 1022000, Total pages: 103
+[I 241114 10:43:44 requests:231] Retrieved page 1 of 103
+[I 241114 10:43:48 requests:231] Retrieved page 2 of 103
+...
+[I 241114 10:50:08 requests:231] Retrieved page 103 of 103
+[I 241114 10:50:09 requests:213] Scroll context cleared successfully
+[I 241114 10:50:09 requests:235] Total Querying time taken: 13116.00ms
+[I 241114 10:50:09 opensearch_test:62] ***Start Period Breakdown Query test***
+[I 241114 10:50:10 requests:293] Total Querying time taken: 376ms
+[I 241114 10:50:10 opensearch_test:67] ***Start Delete Index***
+[I 241114 10:50:13 requests:61] Deleting index 'test' done b'{"acknowledged":true}'
+```
+
+Through this test, you can verify whether OpenSearch is functioning properly.
+
+You can also check the performance.
