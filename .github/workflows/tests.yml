@@ -38,5 +38,5 @@ jobs:
           curl -s http://localhost:9200
 
       - name: Run tests
-        run: python3 es_test_data.py --count=1000 --es_url=http://localhost:9200
+        run: python3 search_test.py --count=2000 --search_db_url=http://localhost:9200
 
