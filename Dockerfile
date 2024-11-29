@@ -39,7 +39,8 @@ RUN pip install --ignore-installed --no-warn-script-location --prefix="/dist" -r
 
 WORKDIR /dist/
 
-COPY es_test_data.py .
+COPY modules ./modules/
+COPY search_test.py .
 
 # For debugging the Build Stage
 CMD ["bash"]
@@ -79,4 +80,4 @@ USER "$APP_USER_NAME"
 COPY --from=build --chown="$APP_USER_NAME":"$APP_GROUP_ID" /dist/ "$PYTHONUSERBASE"/
 
 # Use ENTRYPOINT instead CMD to force the container to start the application
-ENTRYPOINT ["python", "es_test_data.py"]
+ENTRYPOINT ["python", "search_test.py"]
