@@ -26,7 +26,7 @@ steps:
       - pip3 install -r requirements.txt
       - sleep 30
       - curl -s http://es:9200
-      - "python3 es_test_data.py -es_url=http://es:9200"
+      - "python3 search_test.py -es_url=http://es:9200"
     when:
       event:
         - pull_request
