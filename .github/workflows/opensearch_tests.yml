@@ -1,4 +1,4 @@
-name: CI
+name: OpenSearch
 
 on:
   push:
@@ -7,16 +7,16 @@ on:
   pull_request:
 
 jobs:
-  tests:
+  opensearch_tests:
     runs-on: ubuntu-latest
     services:
       es:
-        image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+        image: opensearchproject/opensearch:2
         ports:
           - 9200:9200
         options: >-
-          --env http.port=9200
           --env discovery.type=single-node
+          --env DISABLE_SECURITY_PLUGIN=true
 
     steps:
       - name: Checkout code
@@ -32,11 +32,10 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for Elasticsearch
+      - name: Wait for Opensearch
         run: |
           sleep 10
           curl -s http://localhost:9200
 
       - name: Run tests
         run: python3 search_test.py --count=2000 --search_db_url=http://localhost:9200
-
