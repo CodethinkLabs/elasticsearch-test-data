@@ -242,7 +242,7 @@ def custom_query_search(json_path):
     url = f"{options.search_db_url}/{options.index_name}\
 /_search?request_cache=false"
 
-    if os.path.isfile(json_path):
+    if not os.path.isfile(json_path):
         logging.error("Cannot find JSON file")
         return None
 
