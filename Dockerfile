@@ -17,7 +17,7 @@ ARG APP_GROUP_ID="1000"
 ### --------------------------------------------------------------------
 ### Build Stage
 ### --------------------------------------------------------------------
-FROM python:"$PYTHON_VERSION"-slim-"${DEBIAN_VERSION}" as build
+FROM python:"$PYTHON_VERSION"-slim-"${DEBIAN_VERSION}" AS build
 
 ARG APP_PYTHON_USERBASE
 
@@ -50,7 +50,7 @@ CMD ["bash"]
 ### --------------------------------------------------------------------
 ### App Stage
 ### --------------------------------------------------------------------
-FROM python:"$PYTHON_VERSION"-alpine"${ALPINE_VERSION}" as app
+FROM python:"$PYTHON_VERSION"-alpine"${ALPINE_VERSION}" AS app
 
 # Fetch values from ARGs that were declared at the top of this file
 ARG APP_NAME
